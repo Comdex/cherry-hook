@@ -75,7 +75,7 @@ var _runCMDcb = function(error, stdout, stderr){
 app.post('*', function(req, res){
 		res.send(202);
 		task.defer(function(req, res){
-			    var signature = req.headers["X-Hub-Signature-256"];
+			    var signature = req.headers["x-hub-signature-256"];
 				var eType = req.headers["x-github-event"];
 				var body = req.body;
                 var name = body.repository.name;
