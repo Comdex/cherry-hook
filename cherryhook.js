@@ -132,14 +132,15 @@ var verifySignature =  function(signature, body, secret) {
 
 var containsKeyword = function(commits, keyword) {
 	const lowerKeyword = keyword.toLowerCase();
-    commits.forEach(v => {
-		const lowerStr = v.message.toLowerCase();
+	
+	for(let i=0; i<commits.length; i++) {
+		const lowerStr = commits[i].message.toLowerCase();
 		console.log("lowerMessage: " + lowerStr);
 		if(lowerStr.includes(lowerKeyword)) {
 			console.log("match keyword: " + lowerKeyword);
 			return true;
 		}
-	});
+	}
 
 	return false;
 }
