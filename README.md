@@ -6,6 +6,8 @@ cherry-hook
 
 An application which listens for GitHub webhook and start custom task.
 
+update: support secret verify and keyword trigger
+
 
 How to use
 ===========
@@ -17,7 +19,7 @@ Configurate your repository
 
 First of all, you need to configurate the webhook of your repository.
 
-+ Go to your repository's setting. Add a webhook.
++ Go to your repository's setting. Add a webhook, set json format.
 + Set the Payload URL to your server. If you don't want to use the 80 port, then set it like this `http://your.domain.name:8888`.
 + Click confirm button. 
 

@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var task = require('queue-async')();
 var path = require('path');
 var cp = require('child_process');
+var crypto = require('crypto');
 var app = express();
 app.use(bodyParser.json());
 
@@ -24,10 +25,15 @@ var _reload_config = function(){
 			var res = item[resid];
 			var name = res.name,
 				branch = res.branch,
+				secret = res.secret,
+				keyword = res.keyword,
 				actions = res.actions;
+
 			if (typeof listener[name] === 'undefined'){
 				listener[name] = {};
 			}
+			listener[name]['secret'] = secret;
+			listener[name]['keyword'] = keyword;
 			for (var actionType in res.actions){
 				var action = res.actions[actionType];
 				var arrTask = config.scripts[res.actions[actionType]];
@@ -69,10 +75,36 @@ var _runCMDcb = function(error, stdout, stderr){
 app.post('*', function(req, res){
 		res.send(202);
 		task.defer(function(req, res){
+			    var signature = req.headers["X-Hub-Signature-256"];
 				var eType = req.headers["x-github-event"];
 				var body = req.body;
+                var name = body.repository.name;
+
+				console.log('INFO: Request accepted, repo name: ' + name + ' signature: ' + signature);
+				// check conf
+				if((!listener[name]) || (!listener[name]['secret'])) {
+					console.log('ERROR: There is no configuration for this repo: ' + name);
+					return;
+				}
+				// check signature
+				var ok = verifySignature(signature, body, listener[name]['secret']);
+				if(!ok) {
+					console.log('ERROR: The request is illegal, repo name: ' + name);
+					return;
+				}
+				// check keyword
+				if(listener[name]['keyword'] && listener[name]['keyword'] !== '') {
+					console.log("INFO: start check keyword conf");
+					const keyword = listener[name]['keyword'];
+					const keyOk = containsKeyword(body.commits, keyword);
+					if(!keyOk) {
+						console.log('INFO: No matching keyword found in commits, do not trigger task. keyword: ' + keyword);
+						return;
+					}
+				}
+
 				var branch = body.ref.split('/')[2];
-				var name = body.repository.name;
+				
 				var actions = (listener[name] && listener[name][eType] && listener[name][eType][branch]);
 				if (typeof actions === 'undefined'){
 					console.log('INFO: ' + name + ':' + branch + ' got a ' + eType + ' trigger but no action fount.');
@@ -85,3 +117,27 @@ app.post('*', function(req, res){
 				}
 			}, req, res).await();
 		});
+
+var verifySignature =  function(signature, body, secret) {
+	signature = signature.replace(/^sha256=/, '');
+	const bodyStr = JSON.stringify(body);
+	const digest = Crypto.createHmac('sha256', secret).update(bodyStr).digest('hex');
+	if(digest !== signature) {
+		return false;
+	}
+
+	console.log('verify signature success');
+	return true;
+}
+
+var containsKeyword = function(commits, keyword) {
+	const lowerKeyword = keyword.toLowerCase();
+    commits.forEach(v => {
+		const lowerStr = v.message.toLowerCase();
+		if(lowerStr.includes(lowerKeyword)) {
+			return true;
+		}
+	});
+
+	return false;
+}

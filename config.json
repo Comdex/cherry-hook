@@ -8,6 +8,7 @@
 			{
 				"name": "githooktest",
 				"branch": "master",
+				"secret": "123456",
 				"actions": {
 					"push": "push-task"
 				}
