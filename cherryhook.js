@@ -121,7 +121,7 @@ app.post('*', function(req, res){
 var verifySignature =  function(signature, body, secret) {
 	signature = signature.replace(/^sha256=/, '');
 	const bodyStr = JSON.stringify(body);
-	const digest = Crypto.createHmac('sha256', secret).update(bodyStr).digest('hex');
+	const digest = crypto.createHmac('sha256', secret).update(bodyStr).digest('hex');
 	if(digest !== signature) {
 		return false;
 	}
