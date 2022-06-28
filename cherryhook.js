@@ -113,7 +113,7 @@ app.post('*', function(req, res){
 				for (var i in actions){
 						console.log('INFO: ' + name + ':' + branch + ' triggered script ' + actions[i]);
 						var dirname = path.dirname(path.resolve(actions[i]));
-						cp.execFile(actions[i],[dirname, body.after],{}, _runCMDcb);
+						cp.execFile(actions[i],[dirname, name, branch, body.after],{}, _runCMDcb);
 				}
 			}, req, res).await();
 		});
