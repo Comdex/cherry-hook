@@ -95,6 +95,7 @@ app.post('*', function(req, res){
 					return;
 				}
 
+				var branch = body.ref.split('/')[2];
 				// check custom commit actions
 				if(listener[name]['customCommitActions'] && listener[name]['customCommitActions'].length !== 0) {
 					console.log("INFO: start execute custom commit actions");
@@ -121,7 +122,6 @@ app.post('*', function(req, res){
 					}
 				}
 
-				var branch = body.ref.split('/')[2];
 				
 				var actions = (listener[name] && listener[name][eType] && listener[name][eType][branch]);
 				if (typeof actions === 'undefined'){
