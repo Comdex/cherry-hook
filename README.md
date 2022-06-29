@@ -6,7 +6,7 @@ cherry-hook
 
 An application which listens for GitHub webhook and start custom task.
 
-update: support secret verify and keyword trigger
+update: support secret verify, action keyword trigger and custom commit action.
 
 
 How to use

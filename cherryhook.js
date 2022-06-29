@@ -27,6 +27,7 @@ var _reload_config = function(){
 				branch = res.branch,
 				secret = res.secret,
 				keyword = res.keyword,
+				customCommitActions = res.customCommitActions,
 				actions = res.actions;
 
 			if (typeof listener[name] === 'undefined'){
@@ -34,6 +35,7 @@ var _reload_config = function(){
 			}
 			listener[name]['secret'] = secret;
 			listener[name]['keyword'] = keyword;
+			listener[name]['customCommitActions'] = customCommitActions;
 			for (var actionType in res.actions){
 				var action = res.actions[actionType];
 				var arrTask = config.scripts[res.actions[actionType]];
@@ -92,6 +94,22 @@ app.post('*', function(req, res){
 					console.log('ERROR: The request is illegal, repo name: ' + name);
 					return;
 				}
+
+				// check custom commit actions
+				if(listener[name]['customCommitActions'] && listener[name]['customCommitActions'].length !== 0) {
+					console.log("INFO: start execute custom commit actions");
+					const cations = listener[name]['customCommitActions'];
+					for(let i=0; i<cations.length; i++) {
+						const key = cations[i]['keyword'];
+						const script = cations[i]['script'];
+						if(containsKeyword(body.commits, key)) {
+							console.log("INFO: custom commit action match: " + key);
+							const dir = path.dirname(path.resolve(script));
+						    cp.execFile(script,[dir, name, branch, body.after],{}, _runCMDcb);
+						}
+					}
+				}
+
 				// check keyword
 				if(listener[name]['keyword'] && listener[name]['keyword'] !== '') {
 					console.log("INFO: start check keyword conf");

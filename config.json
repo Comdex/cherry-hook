@@ -9,9 +9,11 @@
 				"name": "githooktest",
 				"branch": "master",
 				"secret": "123456",
+				"keyword": "",
 				"actions": {
 					"push": "push-task"
-				}
+				},
+				"customCommitActions": [{"keyword": "", "script": ""}]
 			}
 		]
 	]
